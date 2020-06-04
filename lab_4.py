@@ -1,6 +1,7 @@
 import math
 from numpy import arange
 from timeit import timeit
+import time
 
 a = 0
 b = math.pi/4
@@ -9,8 +10,6 @@ FUNC = 'math.tan(x)'
 
 
 def benchmark(func):
-    import time
-    
     def wrapper(*args, **kwargs):
         start = time.time()
         return_value = func(*args, **kwargs)
