@@ -3,6 +3,7 @@ from numpy import arange
 from timeit import timeit
 import time
 
+
 a = 0
 b = math.pi/4
 STEP = 0.01
@@ -32,6 +33,7 @@ def left_point_method(func:str, diapason:list):
     
     return summary * STEP
 
+
 @benchmark
 def right_point_method(func:str, diapason:list):
     if not func and not diapason:
@@ -45,6 +47,7 @@ def right_point_method(func:str, diapason:list):
     
     return summary * STEP
 
+
 @benchmark
 def middle_point_method(func:str, diapason:list):
     if not func and not diapason:
@@ -57,6 +60,7 @@ def middle_point_method(func:str, diapason:list):
         summary += eval(f'math.tan({x})')
     
     return summary * STEP
+
 
 @benchmark
 def trapezoid_method(func:str, diapason:list):
@@ -73,6 +77,7 @@ def trapezoid_method(func:str, diapason:list):
             summary += eval(f'math.tan({x})')
     
     return summary * STEP
+
 
 @benchmark
 def simpsons_method(func:str, diapason:list):
