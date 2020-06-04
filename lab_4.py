@@ -1,13 +1,11 @@
 import math
 from numpy import arange
-from timeit import timeit
 import time
 
 
 a = 0
 b = math.pi/4
 STEP = 0.01
-FUNC = 'math.tan(x)'
 
 
 def benchmark(func):
@@ -21,9 +19,9 @@ def benchmark(func):
 
 
 @benchmark
-def left_point_method(func:str, diapason:list):
-    if not func and not diapason:
-        raise Exception("no function or diapason")
+def left_point_method(diapason:list):
+    if not diapason:
+        raise Exception("no diapason")
     if len(diapason) > 2:
         raise Exception("diapason must consistrs of 2 int nums")
 
@@ -35,9 +33,9 @@ def left_point_method(func:str, diapason:list):
 
 
 @benchmark
-def right_point_method(func:str, diapason:list):
-    if not func and not diapason:
-        raise Exception("no function or diapason")
+def right_point_method(diapason:list):
+    if not diapason:
+        raise Exception("no diapason")
     if len(diapason) > 2:
         raise Exception("diapason must consistrs of 2 int nums")
 
@@ -49,9 +47,9 @@ def right_point_method(func:str, diapason:list):
 
 
 @benchmark
-def middle_point_method(func:str, diapason:list):
-    if not func and not diapason:
-        raise Exception("no function or diapason")
+def middle_point_method(diapason:list):
+    if not diapason:
+        raise Exception("no diapason")
     if len(diapason) > 2:
         raise Exception("diapason must consistrs of 2 int nums")
 
@@ -63,9 +61,9 @@ def middle_point_method(func:str, diapason:list):
 
 
 @benchmark
-def trapezoid_method(func:str, diapason:list):
-    if not func and not diapason:
-        raise Exception("no function or diapason")
+def trapezoid_method(diapason:list):
+    if not diapason:
+        raise Exception("no diapason")
     if len(diapason) > 2:
         raise Exception("diapason must consistrs of 2 int nums")
 
@@ -80,9 +78,9 @@ def trapezoid_method(func:str, diapason:list):
 
 
 @benchmark
-def simpsons_method(func:str, diapason:list):
-    if not func and not diapason:
-        raise Exception("no function or diapason")
+def simpsons_method(diapason:list):
+    if not diapason:
+        raise Exception("no diapason")
     if len(diapason) > 2:
         raise Exception("diapason must consistrs of 2 int nums")
 
@@ -101,11 +99,11 @@ def simpsons_method(func:str, diapason:list):
 
 if __name__ == "__main__":
     print('\nВремя выполнения функций:\n')
-    res_1 = left_point_method(FUNC, [a,b])
-    res_2 = right_point_method(FUNC, [a,b])
-    res_3 = middle_point_method(FUNC, [a,b])
-    res_4 = trapezoid_method(FUNC, [a,b])
-    res_5 = simpsons_method(FUNC, [a,b])
+    res_1 = left_point_method([a,b])
+    res_2 = right_point_method([a,b])
+    res_3 = middle_point_method([a,b])
+    res_4 = trapezoid_method([a,b])
+    res_5 = simpsons_method([a,b])
     
     print(f'''
 \nРезультаты работы функций:
