@@ -1,4 +1,5 @@
 from random import randint, choice
+from pyperclip import copy as pypercopy
 
 # if you need only letter+number password use selective_chars = all_chars[12:]
 all_chars = '+-/*!&$#?=@<>abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890' 
@@ -18,8 +19,22 @@ def password_generator(is_all_chars:bool, length:int):
         password = ''
         for _ in range(length):
             password += choice(selective_chars)
+    pypercopy(password)
     return password
 
 if __name__ == "__main__":
-    a = password_generator(False, 24)
-    print(a)
+    while(True):
+        # choice_type = input("Do you want to get password with special chars(+-/*!$ etc.)? [Y/N]")
+        # if choice_type == 'Y':
+        #     choice_type = True
+        # elif choice_type == 'N':
+        #     choice_type = False
+        # else:
+        #     continue
+        choice_length = int(input("length: "))
+        a = password_generator(False, choice_length)
+        print(a)
+        if input() != '':
+            continue
+        else:
+            break
