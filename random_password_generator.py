@@ -24,13 +24,6 @@ def password_generator(is_all_chars:bool, length:int):
 
 if __name__ == "__main__":
     while(True):
-        # choice_type = input("Do you want to get password with special chars(+-/*!$ etc.)? [Y/N]")
-        # if choice_type == 'Y':
-        #     choice_type = True
-        # elif choice_type == 'N':
-        #     choice_type = False
-        # else:
-        #     continue
         choice_length = int(input("length: "))
         a = password_generator(False, choice_length)
         print(a)
