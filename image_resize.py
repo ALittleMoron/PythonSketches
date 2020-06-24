@@ -1,7 +1,6 @@
 from PIL import Image
 import math, re, os, os.path
 
-# TODO: make parsing of directory+path or directory for validation
 
 def img_resize(f_size:str="", path:str="")->Image:
     """resize inputed img in directory and return it
