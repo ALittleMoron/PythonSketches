@@ -6,8 +6,8 @@ import sys
 all_chars = '+-/*!&$#?=@<>abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890' 
 
 if len(sys.argv) == 3: 
-    length = sys.argv[2]
-    is_all_chars = sys.argv[3]
+    length = int(sys.argv[1])
+    is_all_chars = sys.argv[2]
     if is_all_chars.lower() in ('strong', 'all') and is_all_chars.isalpha():
         password = ''
         for _ in range(length):
