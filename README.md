@@ -1,2 +1,3 @@
-# python-sketches
-not a complete project. just a collection of small programs
+Репозиторий с короткими программами, не делающими ничего серьезного.
+Отдельный от learning-python репозиторий, ибо тут ещё хранятся
+лабораторные работы, что не входит в обучение python'у.
