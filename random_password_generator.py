@@ -1,15 +1,15 @@
 from random import choice
 from string import (ascii_letters, ascii_lowercase,
                     ascii_uppercase, digits, punctuation)
-import pyperclip
 import sys
+import pyperclip
 
 
 # более наглядное представление возвращаемого значения
-copied_password = str
+CopiedPassword = str
 
 
-def rnd_password_generator(length:int, char_set:str) -> copied_password:
+def rnd_password_generator(length: int, char_set: str) -> CopiedPassword:
     """функция генерирует сложный случайный пароль, состоящий из
        спец. символов, цифр, латиницы в верхнем и нижнем регистре
 
