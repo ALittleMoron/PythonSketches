@@ -12,17 +12,25 @@
 """
 
 
-from collections import namedtuple
-from typing import NoReturn, List, NamedTuple, Tuple
+import string
+import sys
+from typing import NoReturn, List, NamedTuple, Tuple, Dict, Union, Iterable
+
+
+class ParseError(Exception):
+    """ Исключение, связанное с тем, что программа не смогла распарсить строку. """
+    pass
 
 
 class DFA:
-    def __init__(self, name, rules, start_accept):
+    def __init__(self, name, rules, start_accept: Union[List[str], Tuple[str]], show_on_create: bool=False) -> NoReturn:
         self.name = name
         self.rules = rules
         self.START_STATE, self.ACCEPT_STATES = self.set_start_accept(*start_accept)
         self.CURRENT_STATE = None
-        self.populate_transition_function()
+        
+        if show_on_create:
+            self.populate_transition_function()
 
 
     def set_start_accept(self, start_state: str, accept_state: str):
@@ -43,8 +51,8 @@ class DFA:
 
 
     def run_state_transition(self, input_symbol):
-        if (self.CURRENT_STATE == 'REJECT'):
-            return False
+        if (self.CURRENT_STATE == 'REJECT') or (self.CURRENT_STATE == 'SUCCESS'):
+            return self.CURRENT_STATE
         print("ТЕКУЩЕЕ СОСТОЯНИЕ : {}\tАЛФАВИТ ВВОДА : {}\t СЛЕДУЮЩЕЕ СОСТОЯНИЕ : {}".format(self.CURRENT_STATE, input_symbol, self.rules[self.CURRENT_STATE][input_symbol]))
         self.CURRENT_STATE = self.rules[self.CURRENT_STATE][input_symbol]
         return self.CURRENT_STATE
@@ -63,6 +71,8 @@ class DFA:
             check_state = self.run_state_transition(ele)
             if (check_state == 'REJECT'):
                 return False
+            if (check_state == 'SUCCESS'):
+                return True
         return self.check_if_accept()
 
 
@@ -72,7 +82,6 @@ class AnalyzingInfo(NamedTuple):
     value: str          # 'abc25', '25', '0.25' и т.д.
 
 
-
 class Analyzer:
     _PARSED_TYPES = {
         '+': 'addition operator',
@@ -80,6 +89,7 @@ class Analyzer:
         ':=': 'assignment operator',
         '*': 'multiplication operator',
         '/': 'division operator',
+        '%': 'modulus operator',
         '(': 'open parenthesis',
         ')': 'close parenthesis',
         'int': 'integer number',
@@ -87,36 +97,216 @@ class Analyzer:
     }
     
     
-    def __init__(self, data) -> NoReturn:
-        pass
+    def __init__(self, data: Union[List[dict], Tuple[dict]]) -> NoReturn:
+        self.information = []
+        try:
+            self.data = [
+                self.int_analyzer,
+                self.float_analyzer,
+                self.operator_analyzer,
+                self.variable_analyzer,
+                self.open_parenthesis_analyzer,
+                self.close_parenthesis_analyzer] = data
+        except KeyError as e:
+            print(e)
+            sys.exit('\nНе то количество анализаторов')
 
     
-    def check_on_DFA(self, str_part: str) -> bool:
-        pass
+    def _check_on_DFA(self, str_part: str, dfa: DFA) -> bool:
+        print(dfa.name, str_part)
+        return dfa.run_machine(str_part)
 
 
-    def analyzing(self, input_string: str) -> bool:
-        pass
+    def _type_parser(self, type_parse_string: str) -> str:
+        if type_parse_string in self._PARSED_TYPES:
+            return self._PARSED_TYPES[type_parse_string]
+        else:
+            return 'Not responce'
 
 
-def main():
-    pass
+    def _normalize_data_from_string(self, input_string: str) -> Iterable:
+        values = input_string.partition(':=')
+        parsed_types = (self._type_parser(value.strip()) for value in values)
+        if len(values[1]) == 1:
+            raise ParseError('\nВ строке нет оператора присваивания.')
+        
+        positions = []
+        left_pos = 0
+        for value in values:
+            positions.append(f'{left_pos}-{left_pos + len(value) - 1}')
+            left_pos += len(value)
+        return zip(parsed_types, tuple(positions), values)
+
+
+    def analyzing(self, input_string: str) -> List[AnalyzingInfo]:
+        """ 
+        ядро всего кода. Здесь анализируется введенная строка и заполняется
+        список с информацией по каждой распаршенной части этой строки.
+        """
+        normalized_data = self._normalize_data_from_string(input_string)
+
+        for parsed_type, position, string in normalized_data:
+            for dfa in self.data:
+                if self._check_on_DFA(string, dfa):
+                    self.information.append(AnalyzingInfo(
+                        parsed_type= parsed_type,
+                        position=position,
+                        value=string))
+        print(self.information)
+
+
+def all_dfa() -> List[DFA]:
+    return [
+        DFA(*integer_rules()),
+        DFA(*float_rules()),
+        DFA(*operator_rules()),
+        DFA(*variable_rules()),
+        DFA(*open_parenthesis_rules()),
+        DFA(*close_parenthesis_rules())
+        ]
+
+
+def variable_rules() -> Tuple[str, dict, list]:
+    """ Возвращает правила для формирования ДКА для валидации названия переменной. """
+    return ('Проверка переменной: ' , {
+        'q0': {
+            **dict_of_letters(state='q1'),
+            **dict_of_letters(state='q1', upper_case=True),
+            **dict_of_digits(),
+            **dict_of_special_symbols(),
+            **{' ': 'q0'}},
+        'q1': {
+            **dict_of_letters(state='q1'),
+            **dict_of_letters(state='q1', upper_case=True),
+            **dict_of_digits(state='q1'),
+            **dict_of_special_symbols(),
+            **{' ': 'REJECT', '_': 'q1'} }}, ['q0', 'q1'])
+
+
+def operator_rules() -> Tuple[str, dict, list]:
+    """ Возвращает правила для формирования ДКА для валидации оператора. """
+    return ('Проверка операторов: ', {
+        'q0': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(),
+            **dict_of_special_symbols(),
+            **{' ': 'q0', '*': 'q0', '+': 'q0', '-': 'REJECT', '/': 'q0', '%': 'q0'}
+        }}, ['q0', 'q0'])
+
+
+def integer_rules() -> Tuple[str, dict, list]:
+    """ Возвращает правила для формирования ДКА для валидации числа (int). """
+    return ('Проверка числа (int): ', {
+        'q0': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(state='q1'),
+            **dict_of_special_symbols(),
+            **{' ': 'q0'}
+        },
+        'q1': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(state='q1'),
+            **dict_of_special_symbols(),
+            **{' ': 'q1'}
+        }}, ['q0', 'q1'])
+
+
+def float_rules() -> Tuple[str, dict, list]:
+    """ Возвращает правила для формирования ДКА для валидации числа (float). """
+    return ('Проверка числа (float): ', {
+        'q0': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(state='q1'),
+            **dict_of_special_symbols(),
+            **{' ': 'q0'}
+        },
+        'q1': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(state='q1'),
+            **dict_of_special_symbols(),
+            **{'.': 'q2', ' ': 'REJECT'}
+        },
+        'q2':{
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(state='q2'),
+            **dict_of_special_symbols(),
+            **{' ': 'REJECT'}
+        }}, ['q0', 'q2'])
+
+
+def open_parenthesis_rules() -> Tuple[str, dict, list]:
+    """ Возвращает правила для формирования ДКА для валидации открывающейся строки. """
+    return ('Проверка числа (int): ', {
+        'q0': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(),
+            **dict_of_special_symbols(),
+            **{' ': 'q0', '(': 'q1'}
+        },
+        'q1': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(),
+            **dict_of_special_symbols(),
+            **{' ': 'q1'}
+        }}, ['q0', 'q1'])
+
+
+def close_parenthesis_rules() -> Tuple[str, dict, list]:
+    """ Возвращает правила для формирования ДКА для валидации закрывающихся скобок строки. """
+    return ('Проверка числа (int): ', {
+        'q0': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(),
+            **dict_of_special_symbols(),
+            **{' ': 'q0', ')': 'q1'}
+        },
+        'q1': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(),
+            **dict_of_special_symbols(),
+            **{' ': 'q1'}
+        }}, ['q0', 'q1'])
+
+
+def dict_of_letters(state: str='REJECT', upper_case: bool=False) -> Dict[str, str]:
+    """ Возвращает словарь с ключем-значением 'состояние-переход' по буквенным символам. """
+    letters = string.ascii_uppercase if upper_case else string.ascii_lowercase
+    return {x: state for x in letters}
+
+
+def dict_of_digits(state: str='REJECT') -> Dict[str, str]:
+    """ Возвращает словарь с ключем-значением 'состояние-переход' по циферным символам. """
+    return {x: state for x in string.digits}
+
+
+def dict_of_special_symbols(state: str='REJECT') -> Dict[str, Dict[str, str]]:
+    """ Возвращает словарь с ключем-значением 'состояние-переход' по специальным символам. """
+    return {x: state for x in string.punctuation}
+
+
+def main() -> NoReturn:
+    check = True
+    print("\nЛексический анализатор:")
+    while(check):
+        choice = int(input("\nМеню:\n1. Запустить анализатор с введенной строкой\n2. Выйти из программы\nВыбор [1/2]: "))
+        if (choice == 1):
+            analyzer = Analyzer(all_dfa())
+            print(analyzer.analyzing('abc25:=25+25'))
+        elif (choice == 2):
+            sys.exit()
+        else:
+            check = False
 
 
 if __name__ == "__main__":
-    rules = {
-    'q0': {
-        '0': 'q1',
-        '1': 'q0'
-    },
-    'q1': {
-        '0': 'q2',
-        '1': 'q0'
-    },
-    'q2': {
-        '0': 'q2',
-        '1': 'q0'
-    }
-}
-    a = DFA('ПАРСЕР ПЕРЕМЕННЫХ', rules, ['q0', 'q4'])
-    print(a.run_machine('01101'))
+    main()
