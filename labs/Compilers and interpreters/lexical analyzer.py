@@ -15,6 +15,7 @@
 import string
 import sys
 from typing import NoReturn, List, NamedTuple, Tuple, Dict, Union, Iterable
+from prettytable import PrettyTable
 
 
 class ParseError(Exception):
@@ -50,10 +51,11 @@ class DFA:
                 print("{}\t\t{}\t\t{}".format(key, input_alphabet, transition_state))
 
 
-    def run_state_transition(self, input_symbol):
+    def run_state_transition(self, input_symbol, show_on_process):
         if (self.CURRENT_STATE == 'REJECT') or (self.CURRENT_STATE == 'SUCCESS'):
             return self.CURRENT_STATE
-        print("ТЕКУЩЕЕ СОСТОЯНИЕ : {}\tАЛФАВИТ ВВОДА : {}\t СЛЕДУЮЩЕЕ СОСТОЯНИЕ : {}".format(self.CURRENT_STATE, input_symbol, self.rules[self.CURRENT_STATE][input_symbol]))
+        if show_on_process:
+            print("ТЕКУЩЕЕ СОСТОЯНИЕ : {}\tАЛФАВИТ ВВОДА : {}\t СЛЕДУЮЩЕЕ СОСТОЯНИЕ : {}".format(self.CURRENT_STATE, input_symbol, self.rules[self.CURRENT_STATE][input_symbol]))
         self.CURRENT_STATE = self.rules[self.CURRENT_STATE][input_symbol]
         return self.CURRENT_STATE
 
@@ -65,10 +67,10 @@ class DFA:
             return False
 
 
-    def run_machine(self, in_string):
+    def run_machine(self, in_string, show_on_process: bool=True):
         self.CURRENT_STATE = self.START_STATE
         for ele in in_string:
-            check_state = self.run_state_transition(ele)
+            check_state = self.run_state_transition(ele, show_on_process)
             if (check_state == 'REJECT'):
                 return False
             if (check_state == 'SUCCESS'):
@@ -77,12 +79,14 @@ class DFA:
 
 
 class AnalyzingInfo(NamedTuple):
+    """ Именнованный кортеж с аннотацией типов. """
     parsed_type: str    # 'addition operator', 'subtraction operator' и т.д.
     position: str       # '0-5', '6-12' и т.д.
     value: str          # 'abc25', '25', '0.25' и т.д.
 
 
 class Analyzer:
+    """ Непосредственный класс-анализатор строки подмножества ЯП Pascal. """
     _PARSED_TYPES = {
         '+': 'addition operator',
         '-': 'subtraction operator',
@@ -93,14 +97,16 @@ class Analyzer:
         '(': 'open parenthesis',
         ')': 'close parenthesis',
         'int': 'integer number',
-        'float': 'float number'
+        'float': 'float number',
+        'var': 'variable'
     }
     
     
-    def __init__(self, data: Union[List[dict], Tuple[dict]]) -> NoReturn:
+    def __init__(self, data: Union[List[DFA], Tuple[DFA]]) -> None:
         self.information = []
         try:
             self.data = [
+                self.assignment_operator_analyzer,
                 self.int_analyzer,
                 self.float_analyzer,
                 self.operator_analyzer,
@@ -112,20 +118,54 @@ class Analyzer:
             sys.exit('\nНе то количество анализаторов')
 
     
-    def _check_on_DFA(self, str_part: str, dfa: DFA) -> bool:
-        print(dfa.name, str_part)
-        return dfa.run_machine(str_part)
+    def _check_on_DFA(self, str_part: str, dfa: DFA, show_on_process: bool=True) -> bool:
+        if show_on_process:
+            print('\n' + dfa.name, str_part)
+        return dfa.run_machine(str_part, show_on_process)
 
 
     def _type_parser(self, type_parse_string: str) -> str:
         if type_parse_string in self._PARSED_TYPES:
             return self._PARSED_TYPES[type_parse_string]
         else:
-            return 'Not responce'
+            if self._check_on_DFA(type_parse_string, self.variable_analyzer, show_on_process=False):
+                return self._PARSED_TYPES['var']
+            if self._check_on_DFA(type_parse_string, self.int_analyzer, show_on_process=False):
+                return self._PARSED_TYPES['int']
+            if self._check_on_DFA(type_parse_string, self.float_analyzer, show_on_process=False):
+                return self._PARSED_TYPES['float']
+            if self._check_on_DFA(type_parse_string, self.assignment_operator_analyzer, show_on_process=False):
+                return self._PARSED_TYPES[':=']
+            return 'Not recognized'
 
+
+    def _normalize_right_part(self, right_string_part: str, interval: Tuple[int]) -> Iterable:
+        """ Преобразует правую часть введенной строки. """
+        shift = interval[0]
+        left_pos = 0
+        info = []
+
+        if right_string_part.count('(') != right_string_part.count(')'):
+            return ['Not recognized', '{}-{}'.format(*interval), right_string_part]
+        if not any([True if x in right_string_part else False for x in '()*+-/%']):
+            return [self._type_parser(right_string_part), '{}-{}'.format(*interval), right_string_part]
+        
+        for pos in range(1, len(right_string_part)):
+            for dfa in self.data:
+                if self._check_on_DFA(right_string_part[left_pos:pos], dfa, False):
+                    info.append(
+                        [
+                            self._type_parser(right_string_part[left_pos:pos]),
+                            '{}-{}'.format(left_pos+shift, pos+shift) if left_pos != pos else '{}'.format(pos+shift),
+                            right_string_part[left_pos:pos]
+                        ])
+                    left_pos = pos
+        return info
 
     def _normalize_data_from_string(self, input_string: str) -> Iterable:
+        """ Преобразует введенную строку в кортеж из parsed_types, positions, values строк. """
         values = input_string.partition(':=')
+
         parsed_types = (self._type_parser(value.strip()) for value in values)
         if len(values[1]) == 1:
             raise ParseError('\nВ строке нет оператора присваивания.')
@@ -135,10 +175,29 @@ class Analyzer:
         for value in values:
             positions.append(f'{left_pos}-{left_pos + len(value) - 1}')
             left_pos += len(value)
-        return zip(parsed_types, tuple(positions), values)
+        
+        right_part = self._normalize_right_part(values[2], positions[2][0])
+        for cur_data, ri_part in zip([parsed_types, positions, values], right_part):
+            cur_data[0] += ri_part[0]
+            cur_data[1] += ri_part[1]
+            cur_data[2] += ri_part[2]
+            return cur_data
 
 
-    def analyzing(self, input_string: str) -> List[AnalyzingInfo]:
+    def final_validation(self) -> bool:
+        """ Валидация итоговых данных.
+        Возвращает True, если соблюдена структура, иначе False. """
+        if len(self.information) < 3:
+            return False
+        if self.information[0].parsed_type != 'variable' and self.information[1].parsed_type != 'assignment operator':
+            return False
+        for info in self.information:
+            if info.parsed_type == 'Not recognized':
+                return False
+        return True
+
+
+    def analyzing(self, input_string: str) -> Tuple[List[AnalyzingInfo], bool]:
         """ 
         ядро всего кода. Здесь анализируется введенная строка и заполняется
         список с информацией по каждой распаршенной части этой строки.
@@ -152,11 +211,22 @@ class Analyzer:
                         parsed_type= parsed_type,
                         position=position,
                         value=string))
-        print(self.information)
+        return self.information, self.final_validation()
+
+
+    def pretty_table_print(self, final_valid_res: bool) -> PrettyTable:
+        table = PrettyTable(["Тип лексемы", "Позиция в строке", "Значение"])
+        for info in self.information:
+            table.add_row(info)
+        print('\n\n')
+        print(table, '\n\n+--- Итог: ---+')
+        print('Строка прошла проверку!' if final_valid_res else 'Строка НЕ прошла проверку!')
+
 
 
 def all_dfa() -> List[DFA]:
     return [
+        DFA(*assignment_operator_rules()),
         DFA(*integer_rules()),
         DFA(*float_rules()),
         DFA(*operator_rules()),
@@ -164,6 +234,25 @@ def all_dfa() -> List[DFA]:
         DFA(*open_parenthesis_rules()),
         DFA(*close_parenthesis_rules())
         ]
+
+
+def assignment_operator_rules() -> Tuple[str, dict, list]:
+    """ Возвращает правила для формирования ДКА для валидации оператора присваивания. """
+    return ('Проверка оператора присваивания: ', {
+        'q0': {
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(),
+            **dict_of_special_symbols(),
+            **{' ': 'q0', ':': 'q1'}
+        },
+        'q1':{
+            **dict_of_letters(),
+            **dict_of_letters(upper_case=True),
+            **dict_of_digits(),
+            **dict_of_special_symbols(),
+            **{' ': 'REJECT', "=": 'q1'}
+        }}, ['q0', 'q1'])
 
 
 def variable_rules() -> Tuple[str, dict, list]:
@@ -294,14 +383,16 @@ def dict_of_special_symbols(state: str='REJECT') -> Dict[str, Dict[str, str]]:
     return {x: state for x in string.punctuation}
 
 
-def main() -> NoReturn:
+def main() -> None:
     check = True
-    print("\nЛексический анализатор:")
+    print("\nЛексический анализатор")
     while(check):
         choice = int(input("\nМеню:\n1. Запустить анализатор с введенной строкой\n2. Выйти из программы\nВыбор [1/2]: "))
         if (choice == 1):
+            string = input('\nВведите строку для проверки: ')
             analyzer = Analyzer(all_dfa())
-            print(analyzer.analyzing('abc25:=25+25'))
+            __, valid_result = analyzer.analyzing(string)
+            analyzer.pretty_table_print(valid_result)
         elif (choice == 2):
             sys.exit()
         else:
