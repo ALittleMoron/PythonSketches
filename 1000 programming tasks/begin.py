@@ -1,6 +1,9 @@
 import math
 
 
+# Буду пропускать повторяющиеся задания или очень похожие.
+
+
 # begin1
 def square_Perimeter(side: int) -> int:
     """ Периметр квадрата из его стороны. """
@@ -92,3 +95,22 @@ def diameter_and_circumference_of_cyrcle(S: int) -> (float, float):
     """ Диаметр и длину окружности из площади. """
     D = ((4*S)/math.pi)**0.5
     return D, math.pi*D
+
+
+# begin16
+def distance_between_two_points(x1: int, x2: int) -> int:
+    """ Расстояние между двумя точками (без y1, y2). """
+    return abs(x2-x1)
+
+
+# begin17
+def three_points_and_sum(A: int, B: int, C: int) -> (int, int, int):
+    """ Расстояние АС, BC и их сумма. """
+    return abs(C-A), abs(C-B), abs(C-A) + abs(C-B)
+
+
+# ...
+
+
+if __name__ == "__main__":
+    pass
