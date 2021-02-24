@@ -129,8 +129,10 @@ keyword -- str type. Word (is actually key for decrypt), that will start alphabe
     if not args or len(args) != 4:
         sys.exit(f'Sent {len(args)} arguments: {args}. Need 3 arguments: phrase, shift, keyword; and 1 flag: -d (--decrypt) or -e (--encrypt).')
     if '-e' == args[0]:
-        print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{encrypting(*args[1:])}".')
+        phrase, shift, keyword = args[1:]
+        print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{encrypting(phrase, int(shift), keyword)}".')
     elif '-d' == args[0]:
-        print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{decrypting(*args[1:])}".')
+        phrase, shift, keyword = args[1:]
+        print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{decrypting(phrase, int(shift), keyword)}".')
     else:
         sys.exit('No flags: -d or -e; or flag not on the 1st position.')
