@@ -2,7 +2,6 @@
 import sys
 from string import ascii_lowercase as alphabet
 from string import punctuation
-from random import choice
 
 
 # type hinting
