@@ -1,7 +1,6 @@
 # imports
 import sys
 from math import sqrt
-from random import choice
 from string import ascii_lowercase as alphabet
 from string import punctuation
 
