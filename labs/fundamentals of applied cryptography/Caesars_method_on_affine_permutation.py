@@ -57,7 +57,16 @@ def is_formula_correct(a:int, b: int) -> bool:
     return True if (a not in dividers and b not in dividers) else False
 
 
-def _next_posinion(jumpledAlphabet: str, position: int) -> int:
+def _next_posinion(jumpledAlphabet: list, position: int) -> int:
+    """ Find next position in alphabet, that is zero (needs to be switched to letter).
+
+    Args:
+        jumpledAlphabet (list): current jumpledAlphabet with zeros to be finded.
+        position (int): current position, next state of which should be finded.
+
+    Returns:
+        int: next position in alphabet, that is zero.
+    """    
     for _ in range(position, len(jumpledAlphabet)):
         position = normalized_alpha_index(position+1)
         if jumpledAlphabet[position] == 0:
@@ -69,6 +78,15 @@ def _next_posinion(jumpledAlphabet: str, position: int) -> int:
 
 
 def alphabet_from_formula(initialShift: int, furtherShift: int) -> JumpledAlphabet:
+    """ Generate jumpled alphabet from 2 shifts.
+
+    Args:
+        initialShift (int): shift, that will start jumpling an alphabet.
+        furtherShift (int): shift, that will continue jumpling an alphabet.
+
+    Returns:
+        JumpledAlphabet: jumpled alphabet from 2 shifts.
+    """    
     jumpledAlphabet = [0]* len(alphabet)
     position = initialShift
     for letter in alphabet:
@@ -82,6 +100,16 @@ def alphabet_from_formula(initialShift: int, furtherShift: int) -> JumpledAlphab
 
 
 def encrypting(phrase: str, initialShift: int, furtherShift: int) -> EncryptedString:
+    """ Encrypt input phrase with jumpled alphabet.
+
+    Args:
+        phrase (str): User's string, that will be enctypted.
+        initialShift (int): shift, that will start jumpling an alphabet.
+        furtherShift (int): shift, that will continue jumpling an alphabet.
+
+    Returns:
+        EncryptedString: enctypted string.
+    """    
     encryptedSting = ''
     jumpledAlphabet = alphabet_from_formula(initialShift, furtherShift)
 
@@ -97,6 +125,16 @@ def encrypting(phrase: str, initialShift: int, furtherShift: int) -> EncryptedSt
 
 
 def decrypting(phrase: str, initialShift: int, furtherShift: int) -> DecryptedString:
+    """ Decrypt input phrase with jumpled alphabet.
+
+    Args:
+        phrase (str): Encrypted string from another encrypt program with same method.
+        initialShift (int): shift, that will start jumpling an alphabet.
+        furtherShift (int): shift, that will continue jumpling an alphabet.
+
+    Returns:
+        DecryptedString: decrypted string.
+    """    
     decryptedSting = ''
     jumpledAlphabet = alphabet_from_formula(initialShift, furtherShift)
 
