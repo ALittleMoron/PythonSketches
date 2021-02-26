@@ -1,5 +1,6 @@
 # imports
 import sys
+from math import sqrt
 from random import choice
 from string import ascii_lowercase as alphabet
 from string import punctuation
@@ -47,7 +48,13 @@ def is_formula_correct(a:int, b: int) -> bool:
     b = normalized_alpha_index(b)
     if a < 1 or b < 1:
         return False
-    dividers = (x for x in range(1, len(alphabet)+1) if len(alphabet) % x == 0)
+    dividers = [1]
+    al_len = len(alphabet)
+    for x in range(2, int(sqrt(al_len))+1):
+        if al_len % x == 0:
+            dividers.extend([x, al_len/x])
+    dividers.extend([al_len])
+    dividers = set(dividers)
     return True if (a not in dividers and b not in dividers) else False
 
 
@@ -119,14 +126,12 @@ further_shift -- str type. shift, that will continue jumpling an alphabet.
         sys.exit(f'Sent {len(args)} arguments: {args}. Need 3 arguments: phrase, initial_shift, further_shift; and 1 flag: -d (--decrypt) or -e (--encrypt).')
     if '-e' == args[0]:
         phrase, initial_shift, further_shift = args[1:]
-        # FIXME: strange valid values...
         if is_formula_correct(int(initial_shift), int(further_shift)):
             print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{encrypting(phrase, int(initial_shift), int(further_shift))}".')
         else:
             print('incorrect formula. "a" or "b" is diveders of alphabet length. Try again with valid values.')
     elif '-d' == args[0]:
         phrase, initial_shift, further_shift = args[1:]
-        # FIXME: strange valid values...
         if is_formula_correct(int(initial_shift), int(further_shift)):
             print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{decrypting(phrase, int(initial_shift), int(further_shift))}".')
         else:
