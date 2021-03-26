@@ -32,7 +32,7 @@ def normalized_alpha_index(index: int) -> int:
         raise TypeError(f'index must be integer! Got {type(index)}')
 
 
-def is_formula_correct(a:int, b: int) -> bool:
+def is_formula_correct(a: int, b: int) -> bool:
     """ Validate input formula (at+b). shifts must not be divider of
     alphabet length.
 
@@ -66,7 +66,7 @@ def _next_posinion(jumpledAlphabet: list, position: int) -> int:
 
     Returns:
         int: next position in alphabet, that is zero.
-    """    
+    """
     for _ in range(position, len(jumpledAlphabet)):
         position = normalized_alpha_index(position+1)
         if jumpledAlphabet[position] == 0:
@@ -86,8 +86,8 @@ def alphabet_from_formula(initialShift: int, furtherShift: int) -> JumpledAlphab
 
     Returns:
         JumpledAlphabet: jumpled alphabet from 2 shifts.
-    """    
-    jumpledAlphabet = [0]* len(alphabet)
+    """
+    jumpledAlphabet = [0] * len(alphabet)
     position = initialShift
     for letter in alphabet:
         position = normalized_alpha_index(position)
@@ -109,7 +109,7 @@ def encrypting(phrase: str, initialShift: int, furtherShift: int) -> EncryptedSt
 
     Returns:
         EncryptedString: enctypted string.
-    """    
+    """
     encryptedSting = ''
     jumpledAlphabet = alphabet_from_formula(initialShift, furtherShift)
 
@@ -118,9 +118,11 @@ def encrypting(phrase: str, initialShift: int, furtherShift: int) -> EncryptedSt
             encryptedSting += letter
         else:
             if letter.isupper():
-                encryptedSting += jumpledAlphabet[alphabet.find(letter.lower())].upper()
+                encryptedSting += jumpledAlphabet[alphabet.find(
+                    letter.lower())].upper()
             else:
-                encryptedSting += jumpledAlphabet[alphabet.find(letter.lower())]
+                encryptedSting += jumpledAlphabet[alphabet.find(
+                    letter.lower())]
     return encryptedSting
 
 
@@ -134,7 +136,7 @@ def decrypting(phrase: str, initialShift: int, furtherShift: int) -> DecryptedSt
 
     Returns:
         DecryptedString: decrypted string.
-    """    
+    """
     decryptedSting = ''
     jumpledAlphabet = alphabet_from_formula(initialShift, furtherShift)
 
@@ -143,9 +145,11 @@ def decrypting(phrase: str, initialShift: int, furtherShift: int) -> DecryptedSt
             decryptedSting += letter
         else:
             if letter.isupper():
-                decryptedSting += alphabet[jumpledAlphabet.find(letter.lower())].upper()
+                decryptedSting += alphabet[jumpledAlphabet.find(
+                    letter.lower())].upper()
             else:
-                decryptedSting += alphabet[jumpledAlphabet.find(letter.lower())]
+                decryptedSting += alphabet[jumpledAlphabet.find(
+                    letter.lower())]
     return decryptedSting
 
 
@@ -153,7 +157,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     if '-h' in args:
         sys.exit(
-'''\npython3 Caesars_method_with_keyword.py [-h] [-d] [-e] phrase initial_shift further_shift
+            '''\npython3 Caesars_method_with_keyword.py [-h] [-d] [-e] phrase initial_shift further_shift
 
 phrase -- str type. User's string, that will be enctypted or decrypted.
 initial_shift -- int type. shift, that will start jumpling an alphabet.
@@ -164,14 +168,18 @@ further_shift -- str type. shift, that will continue jumpling an alphabet.
     if '-e' == args[0]:
         phrase, initial_shift, further_shift = args[1:]
         if is_formula_correct(int(initial_shift), int(further_shift)):
-            print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{encrypting(phrase, int(initial_shift), int(further_shift))}".')
+            print(
+                f'Original phrase: "{args[1]}".\nEncrypted phrase: "{encrypting(phrase, int(initial_shift), int(further_shift))}".')
         else:
-            print('incorrect formula. "a" or "b" is diveders of alphabet length. Try again with valid values.')
+            print(
+                'incorrect formula. "a" or "b" is diveders of alphabet length. Try again with valid values.')
     elif '-d' == args[0]:
         phrase, initial_shift, further_shift = args[1:]
         if is_formula_correct(int(initial_shift), int(further_shift)):
-            print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{decrypting(phrase, int(initial_shift), int(further_shift))}".')
+            print(
+                f'Original phrase: "{args[1]}".\nEncrypted phrase: "{decrypting(phrase, int(initial_shift), int(further_shift))}".')
         else:
-            print('incorrect formula. "a" or "b" is diveders of alphabet length. Try again with valid values.')
+            print(
+                'incorrect formula. "a" or "b" is diveders of alphabet length. Try again with valid values.')
     else:
         sys.exit('No flags: -d or -e; or flag not on the 1st position.')

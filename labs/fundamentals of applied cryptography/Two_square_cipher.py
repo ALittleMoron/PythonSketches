@@ -12,7 +12,7 @@ class DecryptError(Exception):
 class Cipher():
     """ Class of two square cipher, that can encrypt
     and decrypt input string with jumpled alhabet.
-    
+
     Cases of use:
     >>> a = Cipher()
     >>> print(a.encrypt('Your string'))
@@ -22,8 +22,9 @@ class Cipher():
     >>> print(a.decrypt('Gvaz ugstlz'))
     'Your string'
 
-    """    
-    def __init__(self, two_squares_list: list=None):
+    """
+
+    def __init__(self, two_squares_list: list = None):
         if two_squares_list == None:
             self.A = Cipher._jumpled_random_square_alphabet()
             self.B = Cipher._jumpled_random_square_alphabet()
@@ -31,12 +32,12 @@ class Cipher():
             self.to_decrypt = False
         else:
             self.two_squares_list = two_squares_list
-            self.A, self.B = Cipher.split_two_square_list(self.two_squares_list)
+            self.A, self.B = Cipher.split_two_square_list(
+                self.two_squares_list)
             self.to_decrypt = True
 
-
     @staticmethod
-    def split_two_square_list(combined_list:list) -> Tuple[List[List[str]]]:
+    def split_two_square_list(combined_list: list) -> Tuple[List[List[str]]]:
         """ Split list of combined two square jumpled alphabet.
 
         Args:
@@ -44,11 +45,10 @@ class Cipher():
 
         Returns:
             (A, B) (tuple): tuple of splited lists
-        """        
+        """
         A = [combined_list[i][:5] for i in range(5)]
         B = [combined_list[i][5:] for i in range(5)]
         return A, B
-
 
     @staticmethod
     def _jumpled_random_square_alphabet() -> List[List[int]]:
@@ -56,11 +56,11 @@ class Cipher():
 
         Returns:
             list: jumpled alphabet as 5x5 matrix.
-        """        
+        """
         positions = [(x, y) for x in range(5) for y in range(5)]
-        shuffle(positions) # make it be random for inserte chars
+        shuffle(positions)  # make it be random for inserte chars
         square = [[0 for _ in range(5)] for _ in range(5)]
-        ascii_letters = ascii_lowercase.replace('i', '') # i = j in square
+        ascii_letters = ascii_lowercase.replace('i', '')  # i = j in square
 
         count = 0
         for x, y in positions:
@@ -75,7 +75,6 @@ class Cipher():
 
         return square
 
-
     @staticmethod
     def two_squares(A: list, B: list) -> list:
         """combines two alphabets(matrix) into one.
@@ -85,8 +84,7 @@ class Cipher():
         """
         return [A[i]+B[i] for i in range(len(A))]
 
-
-    def _find_char_pos(self, alphabet:list, char: str) -> list:
+    def _find_char_pos(self, alphabet: list, char: str) -> list:
         """ Method, that find char position in matrix jumpled alphabet.
 
         Args:
@@ -95,7 +93,7 @@ class Cipher():
 
         Returns:
             list: position of passed char. Example: [3, 0] or [2, 4].
-        """        
+        """
         if char in ('i', 'j'):
             char = 'ji'
         for e_1, row in enumerate(alphabet):
@@ -103,7 +101,6 @@ class Cipher():
                 if letter == char:
                     return [e_1, e_2]
         return [-1, -1]
-
 
     def oposide_positions_of_chars(self, bigram: str) -> list:
         """ Find positions of 2 bigram oposide chars.
@@ -113,7 +110,7 @@ class Cipher():
 
         Returns:
             list of tuples:  list of left and right positions like [(x1,y1), (x2,y2)]
-        """        
+        """
         left, right = list(bigram)
         l_pos = self._find_char_pos(self.A, left)
         r_pos = self._find_char_pos(self.B, right)
@@ -130,12 +127,10 @@ class Cipher():
             l_pos[1] -= 10
         if r_pos[1] >= 10:
             r_pos[1] -= 10
-        return l_pos, r_pos 
-
+        return l_pos, r_pos
 
     def _values_from_oposide(self, positions: List[Tuple[str]]) -> List[str]:
         return [self.two_squares_list[x][y] for x, y in positions]
-
 
     @staticmethod
     def make_bigram_from_string(string: str) -> List[str]:
@@ -147,14 +142,14 @@ class Cipher():
 
         Returns:
             List[str]: lisft of bigrams. Example: ['th', 'is', 'my', 'st', 'ri', 'ng']
-        """        
+        """
         bigram = []
         string = string.replace(' ', '')
         prev_pos = 0
-        
+
         if len(string) % 2 == 1:
             string += 'z'
-        
+
         try:
             for next_pos in range(2, len(string)+2, 2):
                 bigram.append(string[prev_pos:next_pos])
@@ -162,9 +157,8 @@ class Cipher():
         except IndexError as e:
             print(e)
             exit()
-        
-        return bigram
 
+        return bigram
 
     def encrypt(self, input_str: str) -> str:
         """ Main method. Encrypt input string by two square cipher.
@@ -175,7 +169,7 @@ class Cipher():
 
         Returns:
             str: encrypted string.
-        """        
+        """
         bigram = Cipher.make_bigram_from_string(input_str)
         encrypt_string = ''
 
@@ -184,7 +178,6 @@ class Cipher():
             encrypt_string += ''.join(self._values_from_oposide(oposide))
 
         return encrypt_string
-
 
     def decrypt(self, input_str: str) -> str:
         """ Main method. Decrypt input string by two square cipher.
@@ -199,7 +192,7 @@ class Cipher():
 
         Returns:
             str: decrypted string.
-        """        
+        """
         if self.to_decrypt:
             bigram = Cipher.make_bigram_from_string(input_str)
             decrypt_string = ''
@@ -211,7 +204,8 @@ class Cipher():
             return decrypt_string
 
         else:
-            raise DecryptError("Can't decrypt massage. This is encrypt only class.")
+            raise DecryptError(
+                "Can't decrypt massage. This is encrypt only class.")
 
 
 if __name__ == "__main__":

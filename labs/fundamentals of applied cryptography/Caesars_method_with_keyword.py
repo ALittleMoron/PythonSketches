@@ -75,9 +75,11 @@ def encrypting(
             encryptedSting += letter
         else:
             if letter.isupper():
-                encryptedSting += jumpledAlphabet[alphabet.find(letter.lower())].upper()
+                encryptedSting += jumpledAlphabet[alphabet.find(
+                    letter.lower())].upper()
             else:
-                encryptedSting += jumpledAlphabet[alphabet.find(letter.lower())]
+                encryptedSting += jumpledAlphabet[alphabet.find(
+                    letter.lower())]
     return encryptedSting
 
 
@@ -108,30 +110,34 @@ def decrypting(
             decryptedString += letter
         else:
             if letter.isupper():
-                decryptedString += alphabet[jumpledAlphabet.find(letter.lower())].upper()
+                decryptedString += alphabet[jumpledAlphabet.find(
+                    letter.lower())].upper()
             else:
-                decryptedString += alphabet[jumpledAlphabet.find(letter.lower())]
+                decryptedString += alphabet[jumpledAlphabet.find(
+                    letter.lower())]
     return decryptedString
-
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
     if '-h' in args:
         sys.exit(
-'''\npython3 Caesars_method_with_keyword.py [-h] [-d] [-e] phrase shift keyword
+            '''\npython3 Caesars_method_with_keyword.py [-h] [-d] [-e] phrase shift keyword
 
 phrase -- str type. User's string, that will be enctypted.
 shift -- int type. Index of start of alphabet jumpling.
 keyword -- str type. Word (is actually key for decrypt), that will start alphabet from shift to len(keyword).
 ''')
     if not args or len(args) != 4:
-        sys.exit(f'Sent {len(args)} arguments: {args}. Need 3 arguments: phrase, shift, keyword; and 1 flag: -d (--decrypt) or -e (--encrypt).')
+        sys.exit(
+            f'Sent {len(args)} arguments: {args}. Need 3 arguments: phrase, shift, keyword; and 1 flag: -d (--decrypt) or -e (--encrypt).')
     if '-e' == args[0]:
         phrase, shift, keyword = args[1:]
-        print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{encrypting(phrase, int(shift), keyword)}".')
+        print(
+            f'Original phrase: "{args[1]}".\nEncrypted phrase: "{encrypting(phrase, int(shift), keyword)}".')
     elif '-d' == args[0]:
         phrase, shift, keyword = args[1:]
-        print(f'Original phrase: "{args[1]}".\nEncrypted phrase: "{decrypting(phrase, int(shift), keyword)}".')
+        print(
+            f'Original phrase: "{args[1]}".\nEncrypted phrase: "{decrypting(phrase, int(shift), keyword)}".')
     else:
         sys.exit('No flags: -d or -e; or flag not on the 1st position.')
