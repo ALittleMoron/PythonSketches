@@ -1,3 +1,4 @@
 /env
 /__pycache__
 /labs/*/__pycache__
+/labs/*/.vscode
