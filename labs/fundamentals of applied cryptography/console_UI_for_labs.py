@@ -4,6 +4,7 @@ from termcolor import colored, cprint
 
 import Caesars_method_with_keyword as caesar_kw
 import Caesars_method_on_affine_permutation as caesar_af
+import Two_square_cipher as tsq
 import Permutation_method as pm
 
 
@@ -125,7 +126,28 @@ class Menu:
                 f"\nЗашифрованная фраза/предложение: {caesar_af.encrypting(phrase, self.config['af_initial_shift'],self.config['af_further_shift'])}\n\n", 'yellow'))
 
     def two_square_form(self):
-        pass
+        print(colored(
+            '\nЧто вы хотите сделать: зашифровать [e] или расшифровать [d]? Введите букву в зависимости от выбора.', 'cyan'), end='')
+        choice = input('\n> ')
+        if choice == 'd':
+            print(colored(
+                '\nВведите фразу или предложение, которое хотите расшифровать.', 'cyan'), end='')
+            phrase = input('\n> ')
+            decryptable = tsq.Cipher()
+            two_squares = tsq.Cipher(two_squares_list=decryptable.two_squares_list)
+            print(
+                colored(f"\nОригинальная фраза/предложение: {phrase}", "yellow"), end='')
+            print(colored(
+                f"\nРасшифрованная фраза/предложение: {two_squares.decrypt(phrase)}\n\n", 'yellow'), end='')
+        elif choice == 'e':
+            print(colored(
+                '\nВведите фразу или предложение, которое хотите зашифровать.', 'cyan'), end='')
+            phrase = input('\n> ')
+            two_squares = tsq.Cipher()
+            print(
+                colored(f"\nОригинальная фраза/предложение: {phrase}", "yellow"), end='')
+            print(colored(
+                f"\nЗашифрованная фраза/предложение: {two_squares.encrypt(phrase)}\n\n", 'yellow'))
 
     def permutation_form(self):
         print(colored(
@@ -150,9 +172,9 @@ class Menu:
             phrase = input('\n> ')
             permutation = pm.PermutationCipher(self.config['pm_first_keyword'], self.config['pm_second_keyword'], phrase)
             print(
-                colored(f"Оригинальная фраза/предложение: {phrase}", "yellow"), end='')
+                colored(f"\nОригинальная фраза/предложение: {phrase}", "yellow"), end='')
             print(colored(
-                f"Расшифрованная фраза/предложение: {permutation.decrypting()}", 'yellow'), end='')
+                f"\nРасшифрованная фраза/предложение: {permutation.decrypting()}\n\n", 'yellow'), end='')
         elif choice == 'e':
             print(colored(
                 '\nВведите фразу или предложение, которое хотите зашифровать.', 'cyan'), end='')
@@ -183,16 +205,19 @@ class Menu:
             '|================================================|\n'
         ]
 
-        cprint(''.join(menu_string), 'cyan')
-        choice = input('> ')
-        if choice not in menu_choices:
+        try:
+            cprint(''.join(menu_string), 'cyan')
+            choice = input('> ')
+            if choice not in menu_choices:
+                self.main()
+
+            action = menu_choices.get(choice, None)
+            action()
+
             self.main()
-
-        action = menu_choices.get(choice, None)
-        action()
-
-        self.main()
-
+        except Exception:
+            cprint('\nПроизошло непредвиденное обстоятельство. Данный сценарий не был предусмотрен, поэтому программа будет закрыта!', 'red')
+            sys.exit()
 
 if __name__ == "__main__":
     menu = Menu()
