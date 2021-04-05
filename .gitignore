@@ -2,3 +2,4 @@
 /__pycache__
 /labs/*/__pycache__
 /labs/*/.vscode
+/labs/*/*/__pycache__
