@@ -125,9 +125,15 @@ def main() -> None:
     cprint("\nПроверка на то, что у вас есть ключи для шифрования. ", 'yellow')
     keyfilename = input(colored("Введите первую часть файла до нижнего подчеркивания (по умолчанию, \"rsa\"): ", 'cyan'))
 
-    if not os.path.exists(f"{keyfilename}_pubkey.txt") or not os.path.exists(f"{keyfilename}_privkey.txt"):
-        rkg.makeKeyFiles(keyfilename, 1024)
 
+    if not os.path.exists(f"{keyfilename}_pubkey.txt") or not os.path.exists(f"{keyfilename}_privkey.txt"):
+        cprint('\nМы не обнаружили файл/файлы с ключами!', 'yellow')
+        res = input(colored('Введите через пробел название для файла без расширения и размер ключа; Либо пропустите, чтобы добавить файл вручную: ', 'cyan'))
+        if res:
+            keyfilename, keySize = res.split(' ')
+        else:
+            keySize = 1024
+        rkg.makeKeyFiles(keyfilename, int(keySize))
     if response.lower().startswith("e"):
         message = input(colored("\nВведите сообщение для зашифровки: ", 'cyan'))
         pubkey_filename = "rsa_pubkey.txt"
