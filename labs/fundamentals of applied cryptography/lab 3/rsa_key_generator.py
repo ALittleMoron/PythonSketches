@@ -3,20 +3,20 @@ import random
 import sys
 from typing import Tuple
 
-import cryptomath_module as cryptoMath
+import cryptomath
 
 
 def generateKey(keySize: int) -> Tuple[Tuple[int, int], Tuple[int, int]]:
-    p = cryptoMath.generateLargePrime(keySize)
-    q = cryptoMath.generateLargePrime(keySize)
+    p = cryptomath.generateLargePrime(keySize)
+    q = cryptomath.generateLargePrime(keySize)
     n = p * q
 
     while True:
         e = random.randrange(2 ** (keySize - 1), 2 ** (keySize))
-        if cryptoMath.gcd(e, (p - 1) * (q - 1)) == 1:
+        if cryptomath.gcd(e, (p - 1) * (q - 1)) == 1:
             break
 
-    d = cryptoMath.find_mod_inverse(e, (p - 1) * (q - 1))
+    d = cryptomath.find_mod_inverse(e, (p - 1) * (q - 1))
 
     publicKey = (n, e)
     privateKey = (n, d)
