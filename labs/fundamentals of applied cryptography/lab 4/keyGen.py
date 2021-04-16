@@ -3,7 +3,7 @@ from random import randrange
 from cryptomath import generatePrime, primitive_root, find_mod_inverse
 
 
-def generate_key(keySize: int) -> tuple[tuple[int, int, int, int], tuple[int, int]]:
+def keyGen(keySize: int) -> tuple[tuple[int, int, int, int], tuple[int, int]]:
     p = generatePrime(keySize)
     e_1 = primitive_root(p)
     d = randrange(3, p)
