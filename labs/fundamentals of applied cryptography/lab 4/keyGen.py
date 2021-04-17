@@ -1,15 +1,18 @@
 from random import randrange
 
-from cryptomath import generatePrime, primitive_root, find_mod_inverse
+from cryptomath import generatePrime, primitive_root, find_mod_inverse, co_prime_number
 
 
-def keyGen(keySize: int) -> tuple[tuple[int, int, int, int], tuple[int, int]]:
+def keyGen(keySize: int) -> tuple[tuple[int, int, int, int], int]:
     p = generatePrime(keySize)
-    e_1 = primitive_root(p)
-    d = randrange(3, p)
-    e_2 = find_mod_inverse(pow(e_1, d, p), p)
+    g = primitive_root(p)
+    #x = randrange(3, p)
+    x = co_prime_number(p)
+    while x < 3:
+        x = co_prime_number(p)
+    y = pow(g, x, p)
 
-    public_key = (keySize, e_1, e_2, p)
-    private_key = (keySize, d)
+    public_key = (y, g, p)
+    private_key = x
 
     return public_key, private_key
