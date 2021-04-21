@@ -1,9 +1,8 @@
 import random
-from math import sqrt
-from itertools import count, islice
 
 
-__all__ = ['isPrime', 'generatePrime', 'gcd', 'find_mod_inverse', 'gcd_extended']
+__all__ = ['isPrime', 'generatePrime', 'gcd',
+           'find_mod_inverse', 'gcd_extended']
 
 
 def isPrime(n):
@@ -12,6 +11,7 @@ def isPrime(n):
             return False
 
     return True
+
 
 def generatePrime(keysize: int = 10) -> int:
     while True:
@@ -35,7 +35,7 @@ def find_mod_inverse(a: int, m: int) -> int:
         q = u3 // v3
         v1, v2, v3, u1, u2, u3 = (
             u1 - q * v1), (u2 - q * v2), (u3 - q * v3), v1, v2, v3
-    return u1 % m
+    return u1
 
 
 def gcd_extended(a, b):
