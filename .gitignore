@@ -4,3 +4,4 @@
 /labs/*/.vscode
 /labs/*/*/__pycache__
 /labs/*/*/*.txt
+.vscode
